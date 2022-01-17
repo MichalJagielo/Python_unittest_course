@@ -5,7 +5,6 @@ import unittest
 
 def area(width, height):
 
-
     if not (isinstance(width, (int, float)) and
             isinstance(height, (int, float))):
         raise TypeError("Wrong type of enter values: int or float required.")
