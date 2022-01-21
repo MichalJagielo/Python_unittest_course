@@ -1,5 +1,3 @@
-import importlib
-
 import unittest
 import sqlite3
 from sqlite3 import connect
@@ -31,6 +29,8 @@ class TestCustomersDB(unittest.TestCase):
 
         insert_sql = """INSERT INTO customers VALUES (?, ?, ?, ?, ?);"""
         cursor.executemany(insert_sql, customers_data)
+        for row in cursor.execute("""SELECT * FROM customers;"""):
+            print(row)
 
         self.connection = connection
 
@@ -40,29 +40,54 @@ class TestCustomersDB(unittest.TestCase):
     def test_add_customer(self):
         # arrange
         db = CustomersDB(self.connection)
-        db.add_customer('Jan', 'Chmura', 'jan.chmura@mail.com', '444', 'POL')
+        db.add_customer('James', 'Bond', 'james.bond@mail.com', '444', 'POLSKA')
         cursor = self.connection.cursor()
 
         # act
         cursor.execute("""
-        SELECT * 
-        FROM customers 
-        ORDER BY first_name, last_name;
+        SELECT *
+        FROM customers;
         """)
+
+        # assert
+        expected = (
+            ('James', 'Bond', 'james.bond@mail.com', '444', 'POLSKA'),
+            ('Jan', 'Nowak', 'jan.nowak@mail.com', '111', 'USA'),
+            ('Marcin', 'Kowalski', 'marcin.kowalski@mail.com', '222', 'USA'),
+            ('James', 'Bond', 'james.bond@mail.com', '333', 'USA')
+        )
+
+        self.assertEqual(tuple(cursor), expected)
+
+    def test_find_customer_by_first_name(self):
+        # arrange
+        db = CustomersDB(self.connection)
+
+        # act
+        actual = tuple(db.find_customer_by_first_name('James'))
+
+        # assert
+        expected = ('James', 'Bond', 'james.bond@mail.com', '333', 'USA'),
+
+        self.assertEqual(actual, expected)
+
+    def test_find_customers_by_country(self):
+        # arrange
+        db = CustomersDB(self.connection)
+
+        # act
+        actual = tuple(db.find_customer_by_country('USA'))
 
         # assert
 
         expected = (
             ('Jan', 'Nowak', 'jan.nowak@mail.com', '111', 'USA'),
             ('Marcin', 'Kowalski', 'marcin.kowalski@mail.com', '222', 'USA'),
-            ('James', 'Bond', 'james.bond@mail.com', '333', 'USA'),
-            ('Jan', 'Chmura', 'jan.chmura@mail.com', '444', 'POL')
+            ('James', 'Bond', 'james.bond@mail.com', '333', 'USA')
         )
-        self.assertEqual(tuple(cursor), expected)
 
-    # def test_find_customer_by_first_name(self):
-    #     pass
-    #
-    # def test_find_customers_by_country(self):
-    #     pass
+        self.assertEqual(actual, expected)
 
+#
+# if __name__ == '__main__':
+#     unittest.main(verbosity=2)

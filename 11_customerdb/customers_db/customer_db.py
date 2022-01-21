@@ -34,8 +34,7 @@ class CustomersDB:
         sql = """
             SELECT * 
             FROM customers 
-            WHERE country LIKE :country
-            ORDER BY first_name, last_name;"""
+            WHERE country LIKE :country;"""
         cursor.execute(sql, locals())
         for row in cursor:
             yield row
